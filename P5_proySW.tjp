@@ -209,7 +209,7 @@ task WMGame "Web & Mobile Game" {
       allocate boss
       allocate dev2
       actual:effort 20d
-      start 2024-05-15
+      start 2025-05-15
       depends WMGame.twebF
       depends WMGame.tback
   }
