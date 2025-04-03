@@ -19,13 +19,14 @@ project pSix "Web Game"  2024-12-15 +5m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2025-02-25-13:00
+  now 2025-04-03-09:10
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
   # We want to compare the baseline scenario to one with the current one.
   scenario plan "Plan" {
     scenario actual "Actual"
+    scenario baseline "Baseline"
   }
 }
 
@@ -69,6 +70,12 @@ resource dev3 "Peter Green" {
   email "kkk@unizar.es"
 }
 
+resource dev4 "Marcos Gomá" {
+  email "875253@unizar.es"
+  rate 100
+  limits { dailymax 4h }
+}
+
 # Now we specify the work packages. The whole project is described as
 # a task that contains subtasks. These subtasks are then broken down
 # into smaller tasks and so on. The innermost tasks describe the real
@@ -97,6 +104,13 @@ task WMGame "Web & Mobile Game" {
     chargeset back
     responsible dev1
     depends WMGame.tgdesign
+
+    journalentry 2024-04-03 "Incidencia durante la práctica 5" {
+      author boss
+      alert yellow
+      summary "Revisión de dependencias completada hoy."
+    }
+
     task tBEd "Back End General Design" {
       # The effort to finish this task is 5 man-days.
       effort 5d
@@ -128,7 +142,7 @@ task WMGame "Web & Mobile Game" {
     task tGUId "Web GUI Design" {
       effort 9d
       actual:effort 15d
-      allocate dev3
+      allocate dev3, dev4
       journalentry 2025-01-15 "Problems with the GUI design tool" {
         author dev3
         alert yellow
@@ -147,14 +161,58 @@ task WMGame "Web & Mobile Game" {
     }    
   }
 
+  task tmobF "Mobile Front End" {
+    purge chargeset
+    chargeset mFront
+    responsible dev3
+    depends WMGame.tgdesign
+    task tMobGUId "Mobile GUI Design" {
+      effort 8d
+      allocate dev3, dev4
+      depends WMGame.twebF.tGUId
+    }
+    task tMobFEc "Mobile Front End Construction" {
+      effort 12d
+      allocate dev2, dev3, dev4
+      depends WMGame.tmobF.tMobGUId
+    }
+    task tMobFEt "Mobile Front End Test" {
+      effort 5d
+      allocate dev1
+      depends WMGame.tmobF.tMobFEc
+    }
+  }
+
+  task tcloud "Cloud Deployment" {
+    purge chargeset
+    chargeset back
+    responsible dev1
+    depends WMGame.tback.tbackDev
+    task tCloudEval "Cloud Provider Evaluation" {
+      effort 3d
+      allocate dev1, boss
+    }
+    task tCloudConfig "Cloud Configuration" {
+      effort 7d
+      allocate dev1
+      depends WMGame.tcloud.tCloudEval
+    }
+    task tDeploy "Deployment" {
+      effort 5d
+      allocate dev1, dev2, dev4
+      depends WMGame.tcloud.tCloudConfig
+    }
+  }
+
   task ttest "Acceptance tests" {
       effort 10d
       allocate boss
       allocate dev2
       actual:effort 20d
+      start 2024-05-15
       depends WMGame.twebF
       depends WMGame.tback
-      }
+  }
 
     
   task deliveries "Milestones" {
@@ -223,6 +281,11 @@ textreport frame "" {
     formats html
     center '<[report id="overview"]>'
   }
+
+  textreport baseline "Baseline" {
+    formats html
+    center '<[report id="baseline"]>'
+  }
   
   textreport "Status" {
     formats html
@@ -268,6 +331,19 @@ taskreport overview "" {
   hideresource @all
   balance cost rev
   caption 'All effort values are in man days.'
+}
+
+taskreport baseline "" {
+  scenarios baseline
+  headline "Baseline Project Plan"
+  columns bsi { title 'WBS' },
+          name, start, end, effort, cost,
+          revenue, chart { ${TaskTip} }
+  timeformat "%a %Y-%m-%d"
+  loadunit days
+  hideresource @all
+  balance cost rev
+  caption 'All effort values are in man days (Baseline).'
 }
 
 
