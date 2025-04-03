@@ -105,7 +105,7 @@ task WMGame "Web & Mobile Game" {
     responsible dev1
     depends WMGame.tgdesign
 
-    journalentry 2024-04-03 "Incidencia durante la práctica 5" {
+    journalentry 2025-04-03 "Incidencia durante la práctica 5" {
       author boss
       alert yellow
       summary "Revisión de dependencias completada hoy."
